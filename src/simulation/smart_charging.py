@@ -47,6 +47,58 @@ def _shift_load(load_curve: pd.Series, source_minute: int, destination_minute: i
     return shifted
 
 
+def _top_loads(load_curve: pd.Series, n: int = 10) -> list[dict[str, float]]:
+    """Return the highest-load intervals for diagnostics."""
+
+    top = load_curve.sort_values(ascending=False).head(n)
+    return [{"minute_of_day": int(minute), "load_kw": float(load)} for minute, load in top.items()]
+
+
+def _allocate_shift_to_low_load_intervals(
+    load_curve: pd.Series,
+    source_minute: int,
+    load_kw: float,
+    candidate_minutes: list[int],
+    peak_limit: float,
+) -> tuple[pd.Series, list[dict[str, float]]]:
+    """Move one source load into low-load destination intervals without creating a new peak."""
+
+    if load_kw <= 0:
+        return load_curve.copy(), []
+    shifted = load_curve.copy()
+    source_before = float(shifted.loc[source_minute])
+    shifted.loc[source_minute] -= load_kw
+    source_after = float(shifted.loc[source_minute])
+    remaining = float(load_kw)
+    diagnostics: list[dict[str, float]] = []
+
+    while remaining > FLOAT_TOLERANCE:
+        destinations = sorted(candidate_minutes, key=lambda minute: (float(shifted.loc[minute]), abs(minute - source_minute)))
+        destination = next((minute for minute in destinations if peak_limit - float(shifted.loc[minute]) > FLOAT_TOLERANCE), None)
+        if destination is None:
+            raise AssertionError(
+                f"Unable to place shifted load without exceeding baseline peak: source={source_minute}, remaining={remaining}"
+            )
+        destination_before = float(shifted.loc[destination])
+        capacity = max(0.0, peak_limit - destination_before)
+        shifted_energy = min(remaining, capacity)
+        shifted.loc[destination] += shifted_energy
+        remaining -= shifted_energy
+        diagnostics.append(
+            {
+                "source_interval": int(source_minute),
+                "destination_interval": int(destination),
+                "shifted_energy": float(shifted_energy),
+                "source_load_before": source_before,
+                "source_load_after": source_after,
+                "destination_load_before": destination_before,
+                "destination_load_after": float(shifted.loc[destination]),
+            }
+        )
+
+    return shifted, diagnostics
+
+
 def _assert_no_negative_loads(load_curve: pd.Series, strategy_name: str, tolerance: float = FLOAT_TOLERANCE) -> None:
     """Reject physically impossible negative interval loads."""
 
@@ -122,20 +174,35 @@ def _validate_v2g_strategy(base: pd.Series, simulated: pd.Series, strategy_name:
 
 
 def _delay_p3_peak(df: pd.DataFrame, base: pd.Series) -> tuple[pd.Series, float, int, dict[str, Any]]:
-    """Delay P3 charging in peak windows by two hours while conserving load."""
+    """Move P3 charging in peak windows to low-load intervals while conserving load."""
 
     delayed = base.copy()
     shifted = 0.0
     intervals = 0
-    mask = (df["power_level"] == "P3") & (df["hour_of_day"].isin([7, 8, 9, 17, 18, 19, 20]))
-    for _, row in df[mask].iterrows():
+    diagnostics: list[dict[str, float]] = []
+    baseline_peak = float(base.max())
+    peak_hours = {7, 8, 9, 17, 18, 19, 20}
+    candidate_minutes = [minute for minute in base.index if int(minute) // 60 not in peak_hours]
+    mask = (df["power_level"] == "P3") & (df["hour_of_day"].isin(peak_hours))
+    rows = df[mask].sort_values("charging_load_kw", ascending=False)
+    for _, row in rows.iterrows():
         source = int(row.minute_of_day)
-        destination = int((row.minute_of_day + 120) % 1440)
         load_kw = float(row.charging_load_kw)
-        delayed = _shift_load(delayed, source, destination, load_kw)
+        delayed, shift_diagnostics = _allocate_shift_to_low_load_intervals(
+            delayed,
+            source,
+            load_kw,
+            candidate_minutes,
+            baseline_peak,
+        )
+        diagnostics.extend(shift_diagnostics)
         shifted += load_kw
         intervals += 1
     validation = _validate_shifted_strategy(base, delayed, "Delay_P3_Peak")
+    validation["shift_diagnostics"] = diagnostics
+    validation["top_10_loads_before"] = _top_loads(base)
+    validation["top_10_loads_after"] = _top_loads(delayed)
+    validation["destination_minutes_used"] = len({item["destination_interval"] for item in diagnostics})
     return delayed, shifted, intervals, validation
 
 
@@ -144,38 +211,44 @@ def _redistribute_top_stress(
     base: pd.Series,
     stress_mask: pd.Series | np.ndarray,
 ) -> tuple[pd.Series, float, int, dict[str, Any]]:
-    """Redistribute stressed intervals across the least-loaded off-peak slots."""
+    """Redistribute stressed intervals across low-load off-peak slots without stacking peaks."""
 
     redistributed = base.copy()
     shifted = 0.0
     intervals = 0
     off_peak_minutes = _off_peak_minutes(base.index)
-    destination_counts = {minute: 0 for minute in off_peak_minutes}
+    diagnostics: list[dict[str, float]] = []
     if not off_peak_minutes:
         validation = _validate_shifted_strategy(base, redistributed, "Redistribute_Top25Pct")
         validation["destination_minutes_used"] = 0
         return redistributed, shifted, intervals, validation
 
+    baseline_peak = float(base.max())
     rows = df[stress_mask].sort_values("charging_load_kw", ascending=False)
     for _, row in rows.iterrows():
         source = int(row.minute_of_day)
         load_kw = float(row.charging_load_kw)
-        destination = min(
+        redistributed, shift_diagnostics = _allocate_shift_to_low_load_intervals(
+            redistributed,
+            source,
+            load_kw,
             off_peak_minutes,
-            key=lambda minute: (float(redistributed.loc[minute]), destination_counts[minute], abs(minute - source)),
+            baseline_peak,
         )
-        redistributed = _shift_load(redistributed, source, destination, load_kw)
-        destination_counts[destination] += 1
+        diagnostics.extend(shift_diagnostics)
         shifted += load_kw
         intervals += 1
 
     validation = _validate_shifted_strategy(base, redistributed, "Redistribute_Top25Pct")
-    used_destinations = [minute for minute, count in destination_counts.items() if count > 0]
+    destination_counts = pd.Series([item["destination_interval"] for item in diagnostics]).value_counts() if diagnostics else pd.Series(dtype=int)
     validation.update(
         {
-            "destination_minutes_used": len(used_destinations),
-            "max_destination_assignments": max(destination_counts.values()) if destination_counts else 0,
+            "destination_minutes_used": int(destination_counts.size),
+            "max_destination_assignments": int(destination_counts.max()) if not destination_counts.empty else 0,
             "off_peak_minutes_available": len(off_peak_minutes),
+            "shift_diagnostics": diagnostics,
+            "top_10_loads_before": _top_loads(base),
+            "top_10_loads_after": _top_loads(redistributed),
         }
     )
     return redistributed, shifted, intervals, validation
@@ -242,6 +315,36 @@ def _write_simulation_validation_report(cfg: dict[str, Any], validation: dict[st
         )
     else:
         lines.append("Redistribution validation was not run.")
+
+    for strategy_name in ["Delay_P3_Peak", "Redistribute_Top25Pct"]:
+        strategy = validation.get(strategy_name)
+        if not strategy:
+            continue
+        lines.extend([
+            "",
+            f"## {strategy_name} shift diagnostics",
+            "",
+            "| Source interval | Destination interval | Shifted energy | Source before | Source after | Destination before | Destination after |",
+            "| ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+        ])
+        for item in strategy.get("shift_diagnostics", [])[:100]:
+            lines.append(
+                f"| {item['source_interval']} | {item['destination_interval']} | {item['shifted_energy']} | "
+                f"{item['source_load_before']} | {item['source_load_after']} | "
+                f"{item['destination_load_before']} | {item['destination_load_after']} |"
+            )
+        if len(strategy.get("shift_diagnostics", [])) > 100:
+            lines.append(f"| ... | ... | ... | ... | ... | ... | {len(strategy['shift_diagnostics']) - 100} additional shifts omitted |")
+        lines.extend([
+            "",
+            "Top 10 loads before shifting:",
+            "",
+            *[f"- minute {item['minute_of_day']}: {item['load_kw']}" for item in strategy.get("top_10_loads_before", [])],
+            "",
+            "Top 10 loads after shifting:",
+            "",
+            *[f"- minute {item['minute_of_day']}: {item['load_kw']}" for item in strategy.get("top_10_loads_after", [])],
+        ])
     (reports / "simulation_validation.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 

@@ -9,6 +9,7 @@ from src.simulation.smart_charging import (
     _assert_energy_conserved,
     _assert_no_negative_loads,
     _assert_peak_not_unrealistic,
+    _delay_p3_peak,
     _redistribute_top_stress,
     _shift_load,
 )
@@ -16,6 +17,15 @@ from src.simulation.smart_charging import (
 
 def _base_curve(value: float = 10.0) -> pd.Series:
     return pd.Series(value, index=range(0, 1440, 5), dtype=float)
+
+
+
+
+def _peaked_curve() -> pd.Series:
+    curve = pd.Series(5.0, index=range(0, 1440, 5), dtype=float)
+    for minute in [480, 485, 490, 495]:
+        curve.loc[minute] = 20.0
+    return curve
 
 
 def test_shift_load_subtracts_source_and_adds_destination_with_energy_conserved():
@@ -29,7 +39,7 @@ def test_shift_load_subtracts_source_and_adds_destination_with_energy_conserved(
 
 
 def test_redistribution_spreads_load_across_multiple_off_peak_intervals():
-    base = _base_curve()
+    base = _peaked_curve()
     df = pd.DataFrame(
         {
             "minute_of_day": [480, 485, 490, 495],
@@ -85,3 +95,40 @@ def test_time_series_cv_scores_skip_one_class_metric_folds():
     assert skipped
     assert any(value is None for value in scores["test_roc_auc"])
     assert any(value is None for value in scores["test_average_precision"])
+
+
+def test_delay_p3_peak_does_not_exceed_baseline_peak_and_conserves_energy():
+    base = _peaked_curve()
+    df = pd.DataFrame(
+        {
+            "minute_of_day": [480, 485, 490, 495],
+            "hour_of_day": [8, 8, 8, 8],
+            "power_level": ["P3", "P3", "P3", "P3"],
+            "charging_load_kw": [5.0, 5.0, 5.0, 5.0],
+        }
+    )
+
+    delayed, _, _, validation = _delay_p3_peak(df, base)
+
+    assert delayed.max() <= base.max()
+    _assert_energy_conserved(base, delayed, "unit_test_delay")
+    _assert_no_negative_loads(delayed, "unit_test_delay")
+    assert validation["destination_minutes_used"] > 1
+
+
+def test_redistribute_top_stress_does_not_exceed_baseline_peak_and_spreads_load():
+    base = _peaked_curve()
+    df = pd.DataFrame(
+        {
+            "minute_of_day": [480, 485, 490, 495],
+            "charging_load_kw": [5.0, 5.0, 5.0, 5.0],
+            "high_grid_stress": [1, 1, 1, 1],
+        }
+    )
+
+    redistributed, _, _, validation = _redistribute_top_stress(df, base, df["high_grid_stress"] == 1)
+
+    assert redistributed.max() <= base.max()
+    _assert_energy_conserved(base, redistributed, "unit_test_redistribution_peak")
+    _assert_no_negative_loads(redistributed, "unit_test_redistribution_peak")
+    assert validation["destination_minutes_used"] > 1
