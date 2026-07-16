@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier, VotingClassifier
 from sklearn.metrics import average_precision_score, f1_score, precision_score, recall_score, roc_auc_score, accuracy_score, confusion_matrix
-from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold, cross_validate, train_test_split
+from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold, TimeSeriesSplit, cross_validate, train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
@@ -58,6 +58,7 @@ EXPERIMENTS = {
         "predictions_file": "test_predictions_detection.csv",
         "remove_features": [],
         "forecasting": False,
+        "temporal_validation": False,
     },
     "no_leakage": {
         "label": "Experiment B: No-Leakage Detection Benchmark",
@@ -66,6 +67,7 @@ EXPERIMENTS = {
         "predictions_file": "test_predictions_no_leakage.csv",
         "remove_features": LEAKAGE_PRONE_FEATURES,
         "forecasting": False,
+        "temporal_validation": False,
     },
     "forecasting": {
         "label": "Experiment C: One-Interval-Ahead Forecasting",
@@ -74,6 +76,16 @@ EXPERIMENTS = {
         "predictions_file": "test_predictions_forecasting.csv",
         "remove_features": [],
         "forecasting": True,
+        "temporal_validation": False,
+    },
+    "forecasting_temporal": {
+        "label": "Experiment D: Temporal Forecasting Validation",
+        "target": "high_grid_stress_t_plus_1",
+        "metrics_file": "metrics_forecasting_temporal.json",
+        "predictions_file": "test_predictions_forecasting_temporal.csv",
+        "remove_features": [],
+        "forecasting": True,
+        "temporal_validation": True,
     },
 }
 
@@ -103,6 +115,32 @@ def evaluate_predictions(y_true: np.ndarray, prob: np.ndarray, threshold: float 
     }
 
 
+def _json_safe(value: Any) -> Any:
+    """Convert numpy scalars and non-finite floats into JSON-safe values."""
+
+    if isinstance(value, dict):
+        return {key: _json_safe(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_json_safe(item) for item in value]
+    if isinstance(value, tuple):
+        return [_json_safe(item) for item in value]
+    if isinstance(value, np.generic):
+        return _json_safe(value.item())
+    if isinstance(value, float) and not np.isfinite(value):
+        return None
+    return value
+
+
+def _cv_scores_to_dict(cv_scores: dict[str, np.ndarray]) -> dict[str, list[Any]]:
+    """Keep only test scores and make them JSON-safe."""
+
+    return {
+        key: _json_safe(list(values))
+        for key, values in cv_scores.items()
+        if key.startswith("test_")
+    }
+
+
 def _feature_columns(df: pd.DataFrame, remove_features: list[str] | None = None) -> list[str]:
     excluded = set(remove_features or [])
     return [column for column in FEATURES + OPTIONAL_FEATURES if column in df.columns and column not in excluded]
@@ -128,6 +166,17 @@ def _add_forecasting_target(df: pd.DataFrame) -> pd.DataFrame:
         shifted = work["high_grid_stress"].shift(-1)
     work["high_grid_stress_t_plus_1"] = shifted
     return work.dropna(subset=["high_grid_stress_t_plus_1"]).copy()
+
+
+def _chronologically_order_forecasting_rows(df: pd.DataFrame) -> pd.DataFrame:
+    """Order rows by observable interval position for temporal validation."""
+
+    sort_columns = [
+        column
+        for column in ["minute_of_day", "day_type", "series", "vehicle_type", "power_level"]
+        if column in df.columns
+    ]
+    return df.sort_values(sort_columns).copy() if sort_columns else df.copy()
 
 
 def _model_pipeline(name: str, model: Any) -> Pipeline:
@@ -186,7 +235,7 @@ def _train_single_experiment(
         pipe.fit(X_train, y_train)
         prob = pipe.predict_proba(X_test)[:, 1]
         model_metrics = evaluate_predictions(y_test.to_numpy(), prob, cfg["evaluation"]["threshold"])
-        model_metrics["cv"] = {k: list(map(float, v)) for k, v in cv_scores.items() if k.startswith("test_")}
+        model_metrics["cv"] = _cv_scores_to_dict(cv_scores)
         metrics["models"][name] = model_metrics
         predictions[f"{name}_prob"] = prob
         joblib.dump(pipe, model_dir / f"{name}.joblib")
@@ -194,10 +243,77 @@ def _train_single_experiment(
             joblib.dump(pipe, Path(cfg["paths"]["models"]) / f"{name}.joblib")
 
     predictions.to_csv(result_dir / experiment["predictions_file"], index=True)
-    (result_dir / experiment["metrics_file"]).write_text(json.dumps(metrics, indent=2), encoding="utf-8")
+    (result_dir / experiment["metrics_file"]).write_text(json.dumps(_json_safe(metrics), indent=2), encoding="utf-8")
     if experiment_name == "detection":
         predictions.to_csv(result_dir / "test_predictions.csv", index=True)
-        (result_dir / "metrics.json").write_text(json.dumps(metrics["models"], indent=2), encoding="utf-8")
+        (result_dir / "metrics.json").write_text(json.dumps(_json_safe(metrics["models"]), indent=2), encoding="utf-8")
+    return metrics
+
+
+def _train_temporal_forecasting_experiment(
+    cfg: dict[str, Any],
+    df: pd.DataFrame,
+    experiment_name: str,
+    experiment: dict[str, Any],
+) -> dict[str, Any]:
+    """Train one-interval-ahead forecasting models with chronological validation."""
+
+    df = _chronologically_order_forecasting_rows(_add_forecasting_target(df))
+    feature_cols = _feature_columns(df, experiment["remove_features"])
+    X = df[feature_cols].fillna(0)
+    y = df[experiment["target"]].astype(int)
+
+    split_index = int(len(df) * 0.8)
+    if split_index <= 0 or split_index >= len(df):
+        raise ValueError("Temporal forecasting validation requires enough rows for an 80/20 split.")
+
+    X_train, X_test = X.iloc[:split_index], X.iloc[split_index:]
+    y_train, y_test = y.iloc[:split_index], y.iloc[split_index:]
+    result_dir = Path(cfg["paths"]["results"])
+    result_dir.mkdir(parents=True, exist_ok=True)
+    model_dir = Path(cfg["paths"]["models"]) / experiment_name
+    model_dir.mkdir(parents=True, exist_ok=True)
+
+    metrics: dict[str, Any] = {
+        "experiment": experiment["label"],
+        "target": experiment["target"],
+        "features": feature_cols,
+        "removed_features": experiment["remove_features"],
+        "n_rows": int(len(df)),
+        "positive_rate": float(y.mean()),
+        "split": {
+            "method": "chronological_80_20",
+            "train_rows": int(len(X_train)),
+            "test_rows": int(len(X_test)),
+            "train_fraction": 0.8,
+            "test_fraction": 0.2,
+        },
+        "time_series_cv": {"n_splits": 5},
+        "models": {},
+    }
+    predictions = pd.DataFrame({"y_true": y_test.to_numpy()}, index=y_test.index)
+    cv = TimeSeriesSplit(n_splits=5)
+
+    for name, model in available_models(cfg).items():
+        pipe = _model_pipeline(name, model)
+        cv_scores = cross_validate(
+            pipe,
+            X_train,
+            y_train,
+            cv=cv,
+            scoring=["roc_auc", "average_precision", "f1"],
+            error_score=np.nan,
+        )
+        pipe.fit(X_train, y_train)
+        prob = pipe.predict_proba(X_test)[:, 1]
+        model_metrics = evaluate_predictions(y_test.to_numpy(), prob, cfg["evaluation"]["threshold"])
+        model_metrics["cv"] = _cv_scores_to_dict(cv_scores)
+        metrics["models"][name] = model_metrics
+        predictions[f"{name}_prob"] = prob
+        joblib.dump(pipe, model_dir / f"{name}.joblib")
+
+    predictions.to_csv(result_dir / experiment["predictions_file"], index=True)
+    (result_dir / experiment["metrics_file"]).write_text(json.dumps(_json_safe(metrics), indent=2), encoding="utf-8")
     return metrics
 
 
@@ -277,19 +393,101 @@ def write_leakage_analysis_report(
         "- Treat Experiment A as a detection benchmark only; it answers whether the engineered current-interval rule can be recovered.",
         "- Use Experiment B to evaluate detection after removing the features that directly encode the target definition.",
         "- Use Experiment C to evaluate one-interval-ahead forecasting with the shifted `high_grid_stress_t_plus_1` target and current-row predictors.",
+        "- Use Experiment D to evaluate whether one-interval-ahead forecasting remains reliable under chronological validation.",
     ])
     (reports_dir / "leakage_analysis.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _best_model_rows(metrics: dict[str, Any] | None) -> list[str]:
+    """Return compact metric rows for a report table."""
+
+    if not metrics:
+        return []
+    rows = []
+    for model_name, model_metrics in metrics.get("models", {}).items():
+        rows.append(
+            f"| {metrics.get('experiment', 'unknown')} | {model_name} | "
+            f"{_format_metric(model_metrics.get('accuracy'))} | "
+            f"{_format_metric(model_metrics.get('precision'))} | "
+            f"{_format_metric(model_metrics.get('recall'))} | "
+            f"{_format_metric(model_metrics.get('f1'))} | "
+            f"{_format_metric(model_metrics.get('roc_auc'))} | "
+            f"{_format_metric(model_metrics.get('average_precision'))} |"
+        )
+    return rows
+
+
+def write_forecasting_temporal_validation_report(
+    cfg: dict[str, Any],
+    temporal_metrics: dict[str, Any] | None = None,
+    random_split_metrics: dict[str, Any] | None = None,
+) -> None:
+    """Write the Experiment D report without inventing missing metrics."""
+
+    results_dir = Path(cfg["paths"]["results"])
+    reports_dir = Path(cfg["paths"].get("reports", "results/reports"))
+    reports_dir.mkdir(parents=True, exist_ok=True)
+
+    if temporal_metrics is None:
+        temporal_path = results_dir / "metrics_forecasting_temporal.json"
+        if temporal_path.exists():
+            temporal_metrics = json.loads(temporal_path.read_text(encoding="utf-8"))
+    if random_split_metrics is None:
+        random_path = results_dir / "metrics_forecasting.json"
+        if random_path.exists():
+            random_split_metrics = json.loads(random_path.read_text(encoding="utf-8"))
+
+    lines = [
+        "# Forecasting Temporal Validation",
+        "",
+        "## Methodology",
+        "",
+        "Experiment D reuses the one-interval-ahead forecasting dataset from Experiment C by creating `high_grid_stress_t_plus_1` from the current target shifted one interval forward. Models are evaluated with a chronological holdout: the first 80% of observations are used for training and the final 20% are reserved for testing. The experiment also computes `TimeSeriesSplit(n_splits=5)` cross-validation scores on the training window.",
+        "",
+        "## Comparison against random split forecasting",
+        "",
+    ]
+
+    comparison_rows = _best_model_rows(random_split_metrics) + _best_model_rows(temporal_metrics)
+    if comparison_rows:
+        lines.extend([
+            "| Experiment | Model | Accuracy | Precision | Recall | F1 | ROC AUC | Average precision |",
+            "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+            *comparison_rows,
+        ])
+    else:
+        lines.append(
+            "Forecasting metrics have not been generated yet. Run `python -m src.models.train` "
+            "to populate this comparison from actual `metrics_forecasting.json` and "
+            "`metrics_forecasting_temporal.json` files."
+        )
+
+    lines.extend([
+        "",
+        "## Temporal leakage risk",
+        "",
+        "Random train/test splits can mix later observations into training folds while testing on earlier observations. For forecasting, this can overstate deployable performance if temporal ordering matters or if aggregate patterns drift over time. The chronological split is stricter because the test window occurs after all training rows.",
+        "",
+        "## Implications for real-world deployment",
+        "",
+        "Use Experiment D as the deployment-oriented forecasting validation. If temporal performance is materially lower than random-split forecasting, report the temporal result as the primary estimate and treat the random-split result as an optimistic diagnostic rather than a deployment metric.",
+    ])
+    (reports_dir / "forecasting_temporal_validation.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def train_models(config_path: str = "configs/config.yaml", experiments: list[str] | None = None) -> None:
     cfg = load_config(config_path)
     df = pd.read_csv(Path(cfg["paths"]["processed_data"]) / "interval_features.csv")
     selected = experiments or list(EXPERIMENTS)
-    metrics = {
-        experiment_name: _train_single_experiment(cfg, df, experiment_name, EXPERIMENTS[experiment_name])
-        for experiment_name in selected
-    }
+    metrics: dict[str, dict[str, Any]] = {}
+    for experiment_name in selected:
+        experiment = EXPERIMENTS[experiment_name]
+        if experiment.get("temporal_validation", False):
+            metrics[experiment_name] = _train_temporal_forecasting_experiment(cfg, df, experiment_name, experiment)
+        else:
+            metrics[experiment_name] = _train_single_experiment(cfg, df, experiment_name, experiment)
     write_leakage_analysis_report(cfg, metrics)
+    write_forecasting_temporal_validation_report(cfg, metrics.get("forecasting_temporal"), metrics.get("forecasting"))
 
 
 def randomized_search_example(config_path: str = "configs/config.yaml") -> None:

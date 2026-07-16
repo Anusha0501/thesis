@@ -25,7 +25,7 @@ from src.utils.config import load_config
 
 
 LOGGER_NAME = "shap_analysis"
-EXPERIMENT_NAMES = {"detection", "no_leakage", "forecasting"}
+EXPERIMENT_NAMES = {"detection", "no_leakage", "forecasting", "forecasting_temporal"}
 VOTING_ENSEMBLE_MESSAGE = "SHAP not implemented for Voting Ensemble."
 
 
