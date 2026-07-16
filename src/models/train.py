@@ -10,6 +10,7 @@ from typing import Any
 import joblib
 import numpy as np
 import pandas as pd
+from sklearn.base import clone
 from sklearn.ensemble import RandomForestClassifier, VotingClassifier
 from sklearn.metrics import average_precision_score, f1_score, precision_score, recall_score, roc_auc_score, accuracy_score, confusion_matrix
 from sklearn.model_selection import RandomizedSearchCV, StratifiedKFold, TimeSeriesSplit, cross_validate, train_test_split
@@ -250,6 +251,134 @@ def _train_single_experiment(
     return metrics
 
 
+def _temporal_cv_fold_diagnostics(y: pd.Series, cv: TimeSeriesSplit) -> list[dict[str, Any]]:
+    """Summarize class balance for each temporal validation fold."""
+
+    diagnostics: list[dict[str, Any]] = []
+    for fold, (train_idx, test_idx) in enumerate(cv.split(y), start=1):
+        y_train = y.iloc[train_idx]
+        y_test = y.iloc[test_idx]
+        train_counts = {str(label): int(count) for label, count in y_train.value_counts().sort_index().items()}
+        test_counts = {str(label): int(count) for label, count in y_test.value_counts().sort_index().items()}
+        insufficient = y_train.nunique() < 2 or y_test.nunique() < 2
+        diagnostics.append(
+            {
+                "fold": fold,
+                "train_rows": int(len(train_idx)),
+                "test_rows": int(len(test_idx)),
+                "train_class_distribution": train_counts,
+                "test_class_distribution": test_counts,
+                "train_unique_classes": int(y_train.nunique()),
+                "test_unique_classes": int(y_test.nunique()),
+                "status": "insufficient_class_variation" if insufficient else "ok",
+            }
+        )
+    return diagnostics
+
+
+def _time_series_cv_scores(
+    estimator: Pipeline,
+    X: pd.DataFrame,
+    y: pd.Series,
+    cv: TimeSeriesSplit,
+) -> tuple[dict[str, list[Any]], list[dict[str, Any]]]:
+    """Compute temporal CV metrics while skipping one-class folds."""
+
+    scores: dict[str, list[Any]] = {"test_roc_auc": [], "test_average_precision": [], "test_f1": []}
+    fold_results: list[dict[str, Any]] = []
+    for fold, (train_idx, test_idx) in enumerate(cv.split(X), start=1):
+        X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
+        y_train, y_test = y.iloc[train_idx], y.iloc[test_idx]
+        if y_train.nunique() < 2 or y_test.nunique() < 2:
+            fold_results.append(
+                {
+                    "fold": fold,
+                    "status": "insufficient_class_variation",
+                    "roc_auc": None,
+                    "average_precision": None,
+                    "f1": None,
+                }
+            )
+            scores["test_roc_auc"].append(None)
+            scores["test_average_precision"].append(None)
+            scores["test_f1"].append(None)
+            continue
+
+        fold_estimator = clone(estimator)
+        fold_estimator.fit(X_train, y_train)
+        probability = fold_estimator.predict_proba(X_test)[:, 1]
+        prediction = (probability >= 0.5).astype(int)
+        roc_auc = roc_auc_score(y_test, probability)
+        average_precision = average_precision_score(y_test, probability)
+        f1 = f1_score(y_test, prediction, zero_division=0)
+        fold_results.append(
+            {
+                "fold": fold,
+                "status": "ok",
+                "roc_auc": float(roc_auc),
+                "average_precision": float(average_precision),
+                "f1": float(f1),
+            }
+        )
+        scores["test_roc_auc"].append(float(roc_auc))
+        scores["test_average_precision"].append(float(average_precision))
+        scores["test_f1"].append(float(f1))
+    return scores, fold_results
+
+
+def write_temporal_cv_diagnostics_report(
+    cfg: dict[str, Any],
+    fold_diagnostics: list[dict[str, Any]] | None = None,
+) -> None:
+    """Write temporal CV diagnostics without fabricating fold results."""
+
+    reports_dir = Path(cfg["paths"].get("reports", "results/reports"))
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    lines = [
+        "# Temporal CV Diagnostics",
+        "",
+        "## Class distribution per fold",
+        "",
+    ]
+    if fold_diagnostics:
+        lines.extend([
+            "| Fold | Train rows | Test rows | Train class distribution | Test class distribution | Status |",
+            "| ---: | ---: | ---: | --- | --- | --- |",
+        ])
+        for fold in fold_diagnostics:
+            lines.append(
+                f"| {fold['fold']} | {fold['train_rows']} | {fold['test_rows']} | "
+                f"{fold['train_class_distribution']} | {fold['test_class_distribution']} | {fold['status']} |"
+            )
+    else:
+        lines.append(
+            "Temporal CV diagnostics have not been generated yet. Run `python -m src.models.train` "
+            "after building the processed interval dataset."
+        )
+
+    skipped = [fold for fold in fold_diagnostics or [] if fold.get("status") == "insufficient_class_variation"]
+    lines.extend([
+        "",
+        "## Skipped folds",
+        "",
+    ])
+    if skipped:
+        lines.extend(
+            f"- Fold {fold['fold']}: insufficient_class_variation"
+            for fold in skipped
+        )
+    else:
+        lines.append("No folds were skipped, or diagnostics have not been generated yet.")
+
+    lines.extend([
+        "",
+        "## Implications for temporal validation",
+        "",
+        "Temporal folds with only one target class cannot support ROC-AUC or Average Precision because ranking metrics require both positive and negative examples. These folds are recorded as `insufficient_class_variation` rather than assigned fabricated metric values.",
+    ])
+    (reports_dir / "temporal_cv_diagnostics.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def _train_temporal_forecasting_experiment(
     cfg: dict[str, Any],
     df: pd.DataFrame,
@@ -293,27 +422,24 @@ def _train_temporal_forecasting_experiment(
     }
     predictions = pd.DataFrame({"y_true": y_test.to_numpy()}, index=y_test.index)
     cv = TimeSeriesSplit(n_splits=5)
+    fold_diagnostics = _temporal_cv_fold_diagnostics(y_train, cv)
+    metrics["time_series_cv"]["fold_diagnostics"] = fold_diagnostics
 
     for name, model in available_models(cfg).items():
         pipe = _model_pipeline(name, model)
-        cv_scores = cross_validate(
-            pipe,
-            X_train,
-            y_train,
-            cv=cv,
-            scoring=["roc_auc", "average_precision", "f1"],
-            error_score=np.nan,
-        )
+        cv_scores, fold_results = _time_series_cv_scores(pipe, X_train, y_train, cv)
         pipe.fit(X_train, y_train)
         prob = pipe.predict_proba(X_test)[:, 1]
         model_metrics = evaluate_predictions(y_test.to_numpy(), prob, cfg["evaluation"]["threshold"])
-        model_metrics["cv"] = _cv_scores_to_dict(cv_scores)
+        model_metrics["cv"] = cv_scores
+        model_metrics["cv_fold_results"] = fold_results
         metrics["models"][name] = model_metrics
         predictions[f"{name}_prob"] = prob
         joblib.dump(pipe, model_dir / f"{name}.joblib")
 
     predictions.to_csv(result_dir / experiment["predictions_file"], index=True)
     (result_dir / experiment["metrics_file"]).write_text(json.dumps(_json_safe(metrics), indent=2), encoding="utf-8")
+    write_temporal_cv_diagnostics_report(cfg, fold_diagnostics)
     return metrics
 
 

@@ -1,6 +1,10 @@
 import pandas as pd
 import pytest
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import TimeSeriesSplit
+from sklearn.pipeline import Pipeline
 
+from src.models.train import _temporal_cv_fold_diagnostics, _time_series_cv_scores
 from src.simulation.smart_charging import (
     _assert_energy_conserved,
     _assert_no_negative_loads,
@@ -60,3 +64,24 @@ def test_validation_rejects_negative_loads():
 
     with pytest.raises(AssertionError, match="negative loads"):
         _assert_no_negative_loads(simulated, "unit_test_negative", tolerance=1e-6)
+
+
+def test_temporal_cv_diagnostics_flags_one_class_folds():
+    y = pd.Series([0, 0, 0, 0, 1, 1, 1, 1])
+    diagnostics = _temporal_cv_fold_diagnostics(y, TimeSeriesSplit(n_splits=3))
+
+    assert any(fold["status"] == "insufficient_class_variation" for fold in diagnostics)
+    assert all("test_class_distribution" in fold for fold in diagnostics)
+
+
+def test_time_series_cv_scores_skip_one_class_metric_folds():
+    X = pd.DataFrame({"x": range(12)})
+    y = pd.Series([0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1])
+    estimator = Pipeline([("model", RandomForestClassifier(n_estimators=5, random_state=0))])
+
+    scores, fold_results = _time_series_cv_scores(estimator, X, y, TimeSeriesSplit(n_splits=3))
+
+    skipped = [fold for fold in fold_results if fold["status"] == "insufficient_class_variation"]
+    assert skipped
+    assert any(value is None for value in scores["test_roc_auc"])
+    assert any(value is None for value in scores["test_average_precision"])
