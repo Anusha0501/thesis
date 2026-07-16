@@ -1,0 +1,166 @@
+{
+  "random_forest": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "roc_auc": 0.9999999999999999,
+    "average_precision": 1.0,
+    "confusion_matrix": [
+      [
+        1768,
+        0
+      ],
+      [
+        0,
+        313
+      ]
+    ],
+    "cv": {
+      "test_roc_auc": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "test_average_precision": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "test_f1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.998003992015968
+      ]
+    }
+  },
+  "xgboost": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "roc_auc": 1.0,
+    "average_precision": 1.0,
+    "confusion_matrix": [
+      [
+        1768,
+        0
+      ],
+      [
+        0,
+        313
+      ]
+    ],
+    "cv": {
+      "test_roc_auc": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "test_average_precision": [
+        0.9999999999999999,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "test_f1": [
+        1.0,
+        1.0,
+        1.0,
+        0.9979959919839679,
+        1.0
+      ]
+    }
+  },
+  "lightgbm": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "roc_auc": 1.0,
+    "average_precision": 1.0,
+    "confusion_matrix": [
+      [
+        1768,
+        0
+      ],
+      [
+        0,
+        313
+      ]
+    ],
+    "cv": {
+      "test_roc_auc": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "test_average_precision": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "test_f1": [
+        0.9980119284294234,
+        1.0,
+        1.0,
+        0.998003992015968,
+        1.0
+      ]
+    }
+  },
+  "voting_ensemble": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "roc_auc": 1.0,
+    "average_precision": 0.9999999999999999,
+    "confusion_matrix": [
+      [
+        1768,
+        0
+      ],
+      [
+        0,
+        313
+      ]
+    ],
+    "cv": {
+      "test_roc_auc": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "test_average_precision": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "test_f1": [
+        1.0,
+        1.0,
+        1.0,
+        0.998003992015968,
+        1.0
+      ]
+    }
+  }
+}

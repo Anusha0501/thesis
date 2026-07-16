@@ -1,0 +1,198 @@
+{
+  "experiment": "Experiment A: Detection Benchmark",
+  "target": "high_grid_stress",
+  "features": [
+    "hour_of_day",
+    "minute_of_day",
+    "hour_sin",
+    "hour_cos",
+    "is_peak_morning",
+    "is_peak_evening",
+    "is_daytime",
+    "is_night",
+    "power_level_encoded",
+    "power_level_kw_min",
+    "power_level_kw_max",
+    "vehicle_count",
+    "charging_load_kw",
+    "vehicle_type_encoded",
+    "is_service_vehicle",
+    "total_concurrent_load",
+    "p3_concurrent_load",
+    "load_share",
+    "is_workday",
+    "battery_median_kwh",
+    "energy_ratio_median",
+    "daily_charging_freq",
+    "ecr_month_mean"
+  ],
+  "removed_features": [],
+  "n_rows": 10404,
+  "positive_rate": 0.15051903114186851,
+  "models": {
+    "random_forest": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "roc_auc": 0.9999999999999999,
+      "average_precision": 1.0,
+      "confusion_matrix": [
+        [
+          1768,
+          0
+        ],
+        [
+          0,
+          313
+        ]
+      ],
+      "cv": {
+        "test_roc_auc": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "test_average_precision": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "test_f1": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.998003992015968
+        ]
+      }
+    },
+    "xgboost": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0,
+      "average_precision": 1.0,
+      "confusion_matrix": [
+        [
+          1768,
+          0
+        ],
+        [
+          0,
+          313
+        ]
+      ],
+      "cv": {
+        "test_roc_auc": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "test_average_precision": [
+          0.9999999999999999,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "test_f1": [
+          1.0,
+          1.0,
+          1.0,
+          0.9979959919839679,
+          1.0
+        ]
+      }
+    },
+    "lightgbm": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0,
+      "average_precision": 1.0,
+      "confusion_matrix": [
+        [
+          1768,
+          0
+        ],
+        [
+          0,
+          313
+        ]
+      ],
+      "cv": {
+        "test_roc_auc": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "test_average_precision": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "test_f1": [
+          0.9980119284294234,
+          1.0,
+          1.0,
+          0.998003992015968,
+          1.0
+        ]
+      }
+    },
+    "voting_ensemble": {
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0,
+      "average_precision": 0.9999999999999999,
+      "confusion_matrix": [
+        [
+          1768,
+          0
+        ],
+        [
+          0,
+          313
+        ]
+      ],
+      "cv": {
+        "test_roc_auc": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "test_average_precision": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "test_f1": [
+          1.0,
+          1.0,
+          1.0,
+          0.998003992015968,
+          1.0
+        ]
+      }
+    }
+  }
+}

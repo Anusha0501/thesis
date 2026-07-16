@@ -1,0 +1,38 @@
+{
+  "Baseline": {
+    "peak_demand": 223420.60589476454,
+    "peak_load_reduction_pct": 0.0,
+    "load_factor_improvement": 0.0,
+    "off_peak_load_increase": 0.0,
+    "grid_utilization": 0.7296517087281799,
+    "energy_shifted": 0.0,
+    "charging_intervals_redistributed": 0
+  },
+  "Delay_P3_Peak": {
+    "peak_demand": 223420.60589476454,
+    "peak_load_reduction_pct": 0.0,
+    "load_factor_improvement": -1.1102230246251565e-16,
+    "off_peak_load_increase": 2517709.9734233953,
+    "grid_utilization": 0.7296517087281797,
+    "energy_shifted": 7235161.838004468,
+    "charging_intervals_redistributed": 1008
+  },
+  "Redistribute_Top25Pct": {
+    "peak_demand": 211012.61978224418,
+    "peak_load_reduction_pct": 5.55364446481036,
+    "load_factor_improvement": 0.042905056001953046,
+    "off_peak_load_increase": 1527791.8171335794,
+    "grid_utilization": 0.7725567647301329,
+    "energy_shifted": 2338606.362177124,
+    "charging_intervals_redistributed": 313
+  },
+  "V2G_Peak_Shaving": {
+    "peak_demand": 207018.57988251024,
+    "peak_load_reduction_pct": 7.341321963820996,
+    "load_factor_improvement": 0.048554974123333317,
+    "off_peak_load_increase": -183360.0510526374,
+    "grid_utilization": 0.7782066828515132,
+    "energy_shifted": 551803.5409538632,
+    "charging_intervals_redistributed": 29
+  }
+}

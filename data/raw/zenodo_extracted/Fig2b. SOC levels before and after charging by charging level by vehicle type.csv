@@ -1,0 +1,73 @@
+vehicle_SOC_P,Lower Whisker,Q1 (25%),Median (50%),Q3 (75%),Upper Whisker
+,,,,,
+Private car_Start SOC_P1,6,50,74,99,100
+,,,,,
+Private car_Start SOC_P2,6,45,76,99,100
+,,,,,
+Private car_Start SOC_P3,6,33,61,96,100
+,,,,,
+Private car_End SOC_P1,6,50,74,99,100
+,,,,,
+Private car_End SOC_P2,6,45,76,99,100
+,,,,,
+Private car_End SOC_P3,6,33,61,96,100
+,,,,,
+Taxi_Start SOC_P1,6,47,77,99,100
+,,,,,
+Taxi_Start SOC_P2,6,37,83,99,100
+,,,,,
+Taxi_Start SOC_P3,6,38,63,94,100
+,,,,,
+Taxi_End SOC_P1,6,47,77,99,100
+,,,,,
+Taxi_End SOC_P2,6,37,83,99,100
+,,,,,
+Taxi_End SOC_P3,6,38,63,94,100
+,,,,,
+Official car_Start SOC_P1,6,48,72,98,100
+,,,,,
+Official car_Start SOC_P2,6,45,77,99,100
+,,,,,
+Official car_Start SOC_P3,6,36,64,94,100
+,,,,,
+Official car_End SOC_P1,6,48,72,98,100
+,,,,,
+Official car_End SOC_P2,6,45,77,99,100
+,,,,,
+Official car_End SOC_P3,6,36,64,94,100
+,,,,,
+Rental car_Start SOC_P1,6,47,71,97,100
+,,,,,
+Rental car_Start SOC_P2,6,41,76,99,100
+,,,,,
+Rental car_Start SOC_P3,6,35,64,97,100
+,,,,,
+Rental car_End SOC_P1,6,47,71,97,100
+,,,,,
+Rental car_End SOC_P2,6,41,76,99,100
+,,,,,
+Rental car_End SOC_P3,6,35,64,97,100
+,,,,,
+Bus_Start SOC_P1,6,54,79,99,100
+,,,,,
+Bus_Start SOC_P2,6,58,80,99,100
+,,,,,
+Bus_Start SOC_P3,6,61,85,98,100
+,,,,,
+Bus_End SOC_P1,6,54,79,99,100
+,,,,,
+Bus_End SOC_P2,6,58,80,99,100
+,,,,,
+Bus_End SOC_P3,6,61,85,98,100
+,,,,,
+SPV_Start SOC_P1,6,50,71,98,100
+,,,,,
+SPV_Start SOC_P2,6,46,72,98,100
+,,,,,
+SPV_Start SOC_P3,6,45,72,99,100
+,,,,,
+SPV_End SOC_P1,6,50,71,98,100
+,,,,,
+SPV_End SOC_P2,6,46,72,98,100
+,,,,,
+SPV_End SOC_P3,6,45,72,99,100
