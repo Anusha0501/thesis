@@ -1,3 +1,9 @@
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
 from src.preprocessing.audit_reports import generate_reports
 from src.features.feature_engineering import build_interval_dataset
 from src.models.train import train_models

@@ -1,8 +1,10 @@
 """Model training utilities for grid-stress classification."""
 from __future__ import annotations
 
+import sys
 import json
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from typing import Any
 
 import joblib
@@ -29,7 +31,7 @@ FEATURES = [
     "hour_of_day", "minute_of_day", "hour_sin", "hour_cos", "is_peak_morning", "is_peak_evening",
     "is_daytime", "is_night", "power_level_encoded", "power_level_kw_min", "power_level_kw_max",
     "vehicle_count", "charging_load_kw", "vehicle_type_encoded", "is_service_vehicle", "total_concurrent_load",
-    "p3_concurrent_load", "load_share", "cluster_id", "is_workday",
+    "p3_concurrent_load", "load_share", "is_workday",
 ]
 
 
@@ -61,7 +63,8 @@ def evaluate_predictions(y_true: np.ndarray, prob: np.ndarray, threshold: float 
 def train_models(config_path: str = "configs/config.yaml") -> None:
     cfg = load_config(config_path)
     df = pd.read_csv(Path(cfg["paths"]["processed_data"]) / "interval_features.csv")
-    X = df[FEATURES].fillna(0)
+    feature_cols = [c for c in FEATURES + ["battery_median_kwh", "energy_ratio_median", "daily_charging_freq", "daily_driving_dist_p50", "ecr_month_mean"] if c in df.columns]
+    X = df[feature_cols].fillna(0)
     y = df["high_grid_stress"].astype(int)
     stratify = y if cfg["training"].get("stratify", True) and y.nunique() > 1 else None
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=cfg["training"]["test_size"], random_state=cfg["project"]["random_seed"], stratify=stratify)
@@ -85,9 +88,12 @@ def train_models(config_path: str = "configs/config.yaml") -> None:
 
 def randomized_search_example(config_path: str = "configs/config.yaml") -> None:
     """Run a minimal RandomizedSearchCV for Random Forest and save the estimator."""
+
+
     cfg = load_config(config_path)
     df = pd.read_csv(Path(cfg["paths"]["processed_data"]) / "interval_features.csv")
-    X, y = df[FEATURES].fillna(0), df["high_grid_stress"].astype(int)
+    feature_cols = [c for c in FEATURES + ["battery_median_kwh", "energy_ratio_median", "daily_charging_freq", "daily_driving_dist_p50", "ecr_month_mean"] if c in df.columns]
+    X, y = df[feature_cols].fillna(0), df["high_grid_stress"].astype(int)
     search = RandomizedSearchCV(RandomForestClassifier(class_weight="balanced", random_state=42), {"n_estimators": [100, 300], "max_depth": [8, 15, None]}, n_iter=3, scoring="roc_auc", cv=3, random_state=42)
     search.fit(X, y)
     joblib.dump(search.best_estimator_, Path(cfg["paths"]["models"]) / "random_forest_randomized_search.joblib")

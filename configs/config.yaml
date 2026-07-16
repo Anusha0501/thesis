@@ -12,9 +12,7 @@ paths:
   figures: "figures"
   reports: "results/reports"
 data:
-  zenodo_record_id: 13852045
-  zenodo_url: "https://zenodo.org/api/records/13852045"
-  zenodo_zip: "data/raw/13852045.zip"
+  zenodo_zip: "data/raw/13852045 (1).zip"
   charging_load_file: "Fig3-2.Daily charging load from electric vehicles across different vehicle types and power level.csv"
   vehicle_count_file: "Fig3-1.Number of vehicles being charged by level by time of day.csv"
   usage_pattern_file: "Fig2a.Daily usage patterns of EVs across different vehicle types and days.csv"
@@ -46,7 +44,7 @@ features:
   temporal: [hour_of_day, minute_of_day, hour_sin, hour_cos, is_peak_morning, is_peak_evening, is_daytime, is_night]
   charging: [power_level_encoded, power_level_kw_min, power_level_kw_max, vehicle_count, charging_load_kw]
   vehicle: [vehicle_type_encoded, is_service_vehicle, battery_median_kwh, energy_ratio_median, daily_charging_freq, daily_driving_dist_p50]
-  grid: [total_concurrent_load, p3_concurrent_load, load_share, cluster_id]
+  grid: [total_concurrent_load, p3_concurrent_load, load_share]
   contextual: [is_workday, ecr_month_mean]
 models:
   random_forest: {n_estimators: 300, max_depth: 15, min_samples_split: 5, min_samples_leaf: 2, max_features: "sqrt", class_weight: "balanced", n_jobs: -1, random_state: 42}

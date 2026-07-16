@@ -1,3 +1,9 @@
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
 """SHAP artifact generation. Interpretations are intentionally not written."""
 from pathlib import Path
 import joblib
