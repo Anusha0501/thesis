@@ -4,4 +4,19 @@ This report is generated from actual SHAP generation attempts. It does not claim
 
 | Experiment | Model | Status | Message |
 | --- | --- | --- | --- |
-| n/a | n/a | not_run | No saved model artifacts were found. |
+| detection | lightgbm | generated | Artifacts generated. |
+| detection | random_forest | generated | Artifacts generated. |
+| detection | voting_ensemble | skipped | SHAP not implemented for Voting Ensemble. |
+| detection | xgboost | generated | Artifacts generated. |
+| forecasting | lightgbm | generated | Artifacts generated. |
+| forecasting | random_forest | generated | Artifacts generated. |
+| forecasting | voting_ensemble | skipped | SHAP not implemented for Voting Ensemble. |
+| forecasting | xgboost | generated | Artifacts generated. |
+| forecasting_temporal | lightgbm | generated | Artifacts generated. |
+| forecasting_temporal | random_forest | generated | Artifacts generated. |
+| forecasting_temporal | voting_ensemble | skipped | SHAP not implemented for Voting Ensemble. |
+| forecasting_temporal | xgboost | generated | Artifacts generated. |
+| no_leakage | lightgbm | generated | Artifacts generated. |
+| no_leakage | random_forest | generated | Artifacts generated. |
+| no_leakage | voting_ensemble | skipped | SHAP not implemented for Voting Ensemble. |
+| no_leakage | xgboost | generated | Artifacts generated. |

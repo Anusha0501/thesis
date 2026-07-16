@@ -1,13 +1,17 @@
 # Research Feasibility
 
-Status: preliminary, to be verified after dataset audit execution.
+## Feasibility decision
 
-The public Zenodo dataset is expected to support the research question at the charging-interval level because it provides aggregated 5-minute charging load and vehicle-count curves. It does not support individual charging-session or VIN-level analysis.
+The dataset supports the research question at the **charging-interval** level because it contains aggregated 5-minute charging load and vehicle-count curves by vehicle/power categories. It does not support individual-session or vehicle-trajectory claims.
 
-Required files:
+## Required files
 
-- Fig3-2 charging load for interval load features and target construction.
-- Fig3-1 vehicle count for concurrent-vehicle features.
-- Vehicle distribution files for vehicle-type contextual features where joinable.
+- Fig3-2 charging load: target/load features.
+- Fig3-1 vehicle counts: concurrent-count features.
+- Vehicle distribution files (Fig1b, Fig1e, Fig1f-1, Fig1f-2): vehicle-type context features where joinable.
 
-Limitations and assumptions must be finalized only after `python src/preprocessing/audit_reports.py` succeeds on the downloaded CSV files.
+## Limitations
+
+- No VIN/session records.
+- Simulation operates on interval load redistribution, not real charger dispatch.
+- Conclusions must remain empty until pipelines are executed and outputs reviewed.

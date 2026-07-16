@@ -6,7 +6,16 @@ Experiment D reuses the one-interval-ahead forecasting dataset from Experiment C
 
 ## Comparison against random split forecasting
 
-Forecasting metrics have not been generated in this checkout because the processed training table and trained artifacts are not present. Run `python -m src.models.train` after building `data/processed/interval_features.csv`; the training code will populate this section from actual `metrics_forecasting.json` and `metrics_forecasting_temporal.json` files without fabricating results.
+| Experiment | Model | Accuracy | Precision | Recall | F1 | ROC AUC | Average precision |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Experiment C: One-Interval-Ahead Forecasting | random_forest | 0.9716 | 0.8684 | 0.9550 | 0.9096 | 0.9971 | 0.9848 |
+| Experiment C: One-Interval-Ahead Forecasting | xgboost | 0.9932 | 0.9775 | 0.9775 | 0.9775 | 0.9997 | 0.9982 |
+| Experiment C: One-Interval-Ahead Forecasting | lightgbm | 0.9961 | 0.9903 | 0.9839 | 0.9871 | 0.9998 | 0.9991 |
+| Experiment C: One-Interval-Ahead Forecasting | voting_ensemble | 0.9937 | 0.9776 | 0.9807 | 0.9791 | 0.9994 | 0.9970 |
+| Experiment D: Temporal Forecasting Validation | random_forest | 0.7324 | 0.9787 | 0.1426 | 0.2490 | 0.9528 | 0.8768 |
+| Experiment D: Temporal Forecasting Validation | xgboost | 0.8983 | 0.9677 | 0.6961 | 0.8097 | 0.9708 | 0.9447 |
+| Experiment D: Temporal Forecasting Validation | lightgbm | 0.9065 | 0.9669 | 0.7240 | 0.8280 | 0.9546 | 0.9277 |
+| Experiment D: Temporal Forecasting Validation | voting_ensemble | 0.8973 | 0.9737 | 0.6884 | 0.8065 | 0.9693 | 0.9402 |
 
 ## Temporal leakage risk
 

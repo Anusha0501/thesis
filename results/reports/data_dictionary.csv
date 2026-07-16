@@ -1,0 +1,169 @@
+dataset,column,dtype,non_null,nulls,unique_values,min,max,meaning
+charging_load,time_slot,int64,289,0,289,0,288,Temporal index or time-of-day field from the aggregated public dataset.
+charging_load,Private car_P1_workday,float64,289,0,288,1067.406820250348,4464.008406057204,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Private car_P2_workday,float64,289,0,288,1982.4898048067143,14893.774667222002,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Private car_P3_workday,float64,289,0,288,972.0406932655608,7597.218483723171,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Taxi_P1_workday,float64,289,0,288,30.55965003642169,210.99185981940136,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Taxi_P2_workday,float64,289,0,288,202.7743830381695,2649.808257098225,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Taxi_P3_workday,float64,289,0,288,311.0210492936048,1862.803586190397,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Official car_P1_workday,float64,289,0,288,187.46769371179315,552.0543206370947,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Official car_P2_workday,float64,289,0,288,690.4070056809508,3354.431676818678,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Official car_P3_workday,float64,289,0,288,1264.1151122247632,5427.720476051053,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Rental car_P1_workday,float64,289,0,288,47.86460286057131,144.84922271577472,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Rental car_P2_workday,float64,289,0,288,150.80883832284897,644.5713203026411,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Rental car_P3_workday,float64,289,0,288,586.4629322731133,4643.187084052238,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Bus_P1_workday,float64,289,0,288,1998.421003409753,16658.012959192336,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Bus_P2_workday,float64,289,0,288,3835.923090973022,24150.26704935924,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Bus_P3_workday,float64,289,0,288,3475.26558763737,61999.23895180179,Charging power-level or delivered-power aggregate/statistic.
+charging_load,SPV_P1_workday,float64,289,0,288,172.9148764920957,764.039100883156,Charging power-level or delivered-power aggregate/statistic.
+charging_load,SPV_P2_workday,float64,289,0,288,1559.1164628271072,8714.118984687046,Charging power-level or delivered-power aggregate/statistic.
+charging_load,SPV_P3_workday,float64,289,0,288,446.5370949074304,1596.38841514928,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Private car_P1_weekend & holiday,float64,289,0,288,1072.2184426057256,4252.606444455538,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Private car_P2_weekend & holiday,float64,289,0,288,2062.577284688244,16238.010357272531,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Private car_P3_weekend & holiday,float64,289,0,288,1176.791872896254,7992.72382707487,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Taxi_P1_weekend & holiday,float64,289,0,288,34.03945705294609,245.27091281861067,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Taxi_P2_weekend & holiday,float64,289,0,288,286.925465926528,2803.2168662780896,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Taxi_P3_weekend & holiday,float64,289,0,288,381.0687240660191,1626.0722487717867,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Official car_P1_weekend & holiday,float64,289,0,288,171.1750207288375,615.1262497700104,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Official car_P2_weekend & holiday,float64,289,0,288,789.7171559192241,3791.843534326181,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Official car_P3_weekend & holiday,float64,289,0,288,1548.6550799316417,5885.3734952619925,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Rental car_P1_weekend & holiday,float64,289,0,288,60.636559626087546,187.52042935276404,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Rental car_P2_weekend & holiday,float64,289,0,288,196.81241298715275,823.4734144664947,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Rental car_P3_weekend & holiday,float64,289,0,288,873.2018121158084,5813.560171776513,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Bus_P1_weekend & holiday,float64,289,0,288,2214.649811487645,21264.54067500432,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Bus_P2_weekend & holiday,float64,289,0,288,3679.490547676881,18607.125617027283,Charging power-level or delivered-power aggregate/statistic.
+charging_load,Bus_P3_weekend & holiday,float64,289,0,288,3875.206171870232,45513.13972559199,Charging power-level or delivered-power aggregate/statistic.
+charging_load,SPV_P1_weekend & holiday,float64,289,0,288,182.81838085500056,881.1299539078415,Charging power-level or delivered-power aggregate/statistic.
+charging_load,SPV_P2_weekend & holiday,float64,289,0,288,1728.4881756884356,10848.161655387905,Charging power-level or delivered-power aggregate/statistic.
+charging_load,SPV_P3_weekend & holiday,float64,289,0,288,433.2497497399648,1864.630896649758,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,time_slot,int64,289,0,289,0,288,Temporal index or time-of-day field from the aggregated public dataset.
+vehicle_count,Private car_P1_workday,int64,289,0,229,400,1331,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Private car_P2_workday,int64,289,0,255,348,2551,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Private car_P3_workday,int64,289,0,143,38,270,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Taxi_P1_workday,int64,289,0,59,11,69,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Taxi_P2_workday,int64,289,0,184,33,427,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Taxi_P3_workday,int64,289,0,51,14,75,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Official car_P1_workday,int64,289,0,106,70,194,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Official car_P2_workday,int64,289,0,186,115,559,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Official car_P3_workday,int64,289,0,124,70,230,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Rental car_P1_workday,int64,289,0,34,18,51,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Rental car_P2_workday,int64,289,0,75,24,99,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Rental car_P3_workday,int64,289,0,107,26,176,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Bus_P1_workday,int64,289,0,171,75,562,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Bus_P2_workday,int64,289,0,157,67,311,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Bus_P3_workday,int64,289,0,157,37,361,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,SPV_P1_workday,int64,289,0,121,43,177,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,SPV_P2_workday,int64,289,0,156,59,315,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,SPV_P3_workday,int64,289,0,20,7,26,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Private car_P1_weekend & holiday,int64,289,0,244,413,1518,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Private car_P2_weekend & holiday,int64,289,0,266,365,2812,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Private car_P3_weekend & holiday,int64,289,0,151,48,289,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Taxi_P1_weekend & holiday,int64,289,0,70,12,81,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Taxi_P2_weekend & holiday,int64,289,0,189,47,455,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Taxi_P3_weekend & holiday,int64,289,0,46,18,68,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Official car_P1_weekend & holiday,int64,289,0,124,72,225,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Official car_P2_weekend & holiday,int64,289,0,191,143,643,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Official car_P3_weekend & holiday,int64,289,0,123,91,260,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Rental car_P1_weekend & holiday,int64,289,0,46,21,66,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Rental car_P2_weekend & holiday,int64,289,0,90,29,123,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Rental car_P3_weekend & holiday,int64,289,0,119,39,221,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Bus_P1_weekend & holiday,int64,289,0,166,79,717,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Bus_P2_weekend & holiday,int64,289,0,143,63,304,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,Bus_P3_weekend & holiday,int64,289,0,126,39,274,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,SPV_P1_weekend & holiday,int64,289,0,136,50,211,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,SPV_P2_weekend & holiday,int64,289,0,179,64,399,Charging power-level or delivered-power aggregate/statistic.
+vehicle_count,SPV_P3_weekend & holiday,int64,289,0,24,6,29,Charging power-level or delivered-power aggregate/statistic.
+usage_pattern,time_slot,int64,97,0,97,0,96,Temporal index or time-of-day field from the aggregated public dataset.
+usage_pattern,Private car_workday_driving,float64,97,0,96,0.0686550746246838,0.4132369278896051,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Private car_workday_charging,float64,97,0,96,0.0385548685114531,0.1657804528643891,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Private car_workday_parked,float64,97,0,96,0.537588255931237,0.8673054715022878,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Private car_weekend & holiday_driving,float64,97,0,96,0.0838308007718282,0.3545133863965268,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Private car_weekend & holiday_charging,float64,97,0,96,0.0391441550088438,0.1855905290239588,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Private car_weekend & holiday_parked,float64,97,0,96,0.5482895159993568,0.8448856327383824,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Taxi_workday_driving,float64,97,0,96,0.0474582784365393,0.5461407553798858,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Taxi_workday_charging,float64,97,0,95,0.0498188405797101,0.3373956960913483,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Taxi_workday_parked,float64,97,0,96,0.3538098375054898,0.7852986385595081,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Taxi_weekend & holiday_driving,float64,97,0,96,0.0564613526570048,0.5359299516908212,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Taxi_weekend & holiday_charging,float64,97,0,95,0.058725845410628,0.3640549516908212,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Taxi_weekend & holiday_parked,float64,97,0,95,0.3538647342995169,0.7557367149758454,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Official car_workday_driving,float64,97,0,96,0.0797277990826377,0.4071734716896007,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Official car_workday_charging,float64,97,0,96,0.0469433792014437,0.1651627941950522,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Official car_workday_parked,float64,97,0,96,0.4922099405970374,0.8394014587562975,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Official car_weekend & holiday_driving,float64,97,0,96,0.1061414392059553,0.4323407775020678,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Official car_weekend & holiday_charging,float64,97,0,95,0.0567204301075268,0.1931348221670802,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Official car_weekend & holiday_parked,float64,97,0,95,0.4639371381306865,0.7964226633581473,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Rental car_workday_driving,float64,97,0,95,0.1712867432353513,0.4883200311465836,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Rental car_workday_charging,float64,97,0,96,0.0334436441502822,0.1500486665368892,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Rental car_workday_parked,float64,97,0,96,0.4471092077087795,0.7535137239634028,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Rental car_weekend & holiday_driving,float64,97,0,95,0.2260706638115631,0.5857066381156317,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Rental car_weekend & holiday_charging,float64,97,0,92,0.0451820128479657,0.1880085653104925,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Rental car_weekend & holiday_parked,float64,97,0,96,0.3360278372591005,0.6820663811563169,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Bus_workday_driving,float64,97,0,95,0.0370507399577167,0.6796723044397462,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Bus_workday_charging,float64,97,0,96,0.0301849894291754,0.1354862579281184,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Bus_workday_parked,float64,97,0,96,0.2306553911205073,0.919223044397463,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Bus_weekend & holiday_driving,float64,97,0,96,0.0355668604651162,0.5260029069767442,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Bus_weekend & holiday_charging,float64,97,0,96,0.0299563953488372,0.1391860465116279,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,Bus_weekend & holiday_parked,float64,97,0,94,0.3784011627906976,0.917936046511628,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,SPV_workday_driving,float64,97,0,96,0.1025268283458611,0.4846830236845837,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,SPV_workday_charging,float64,97,0,96,0.0363541814399848,0.1379946106935186,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,SPV_workday_parked,float64,97,0,96,0.4090790904363447,0.82530846688413,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,SPV_weekend & holiday_driving,float64,97,0,94,0.1271775871034841,0.5137155486219449,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,SPV_weekend & holiday_charging,float64,97,0,95,0.0421541861674467,0.1667641705668226,Dataset-provided aggregate column; inspect values before modelling.
+usage_pattern,SPV_weekend & holiday_parked,float64,97,0,96,0.3683372334893395,0.7892940717628705,Dataset-provided aggregate column; inspect values before modelling.
+soc,vehicle_SOC_P,str,36,36,36,,,Vehicle category/count/statistic field.
+soc,Lower Whisker,float64,36,36,1,6.0,6.0,Dataset-provided aggregate column; inspect values before modelling.
+soc,Q1 (25%),float64,36,36,14,33.0,61.0,Dataset-provided aggregate column; inspect values before modelling.
+soc,Median (50%),float64,36,36,12,61.0,85.0,Dataset-provided aggregate column; inspect values before modelling.
+soc,Q3 (75%),float64,36,36,5,94.0,99.0,Dataset-provided aggregate column; inspect values before modelling.
+soc,Upper Whisker,float64,36,36,1,100.0,100.0,Dataset-provided aggregate column; inspect values before modelling.
+ecr_temp,time_slot,int64,84,0,84,0,83,Temporal index or time-of-day field from the aggregated public dataset.
+ecr_temp,Temperature,float64,84,0,77,-4.6,29.2,Energy-consumption-rate contextual variable.
+ecr_temp,ECR,float64,84,0,82,14.739393939393942,24.23076923076923,Energy-consumption-rate contextual variable.
+ecr_month,time_slot,int64,12,0,12,0,11,Temporal index or time-of-day field from the aggregated public dataset.
+ecr_month,Beijing,float64,12,0,12,15.576,24.23076923076923,Dataset-provided aggregate column; inspect values before modelling.
+ecr_month,Shanghai,float64,12,0,12,16.176470588235293,20.36176470588235,Dataset-provided aggregate column; inspect values before modelling.
+ecr_month,Guangzhou,float64,12,0,12,14.739393939393942,17.735849056603772,Dataset-provided aggregate column; inspect values before modelling.
+ecr_month,Shenzhen,float64,12,0,12,16.529133858267716,19.13535353535353,Dataset-provided aggregate column; inspect values before modelling.
+ecr_month,Nanjing,float64,12,0,12,16.153846153846153,20.293436293436294,Dataset-provided aggregate column; inspect values before modelling.
+ecr_month,Chengdu,float64,12,0,12,15.320366972477062,17.845454545454544,Dataset-provided aggregate column; inspect values before modelling.
+ecr_month,Chongqing,float64,12,0,12,15.827191867852603,18.85585585585586,Dataset-provided aggregate column; inspect values before modelling.
+clusters,cluster_id,int64,144,0,3,0,2,Dataset-provided aggregate column; inspect values before modelling.
+clusters,t,int64,144,0,24,0,23,Dataset-provided aggregate column; inspect values before modelling.
+clusters,q25,float64,144,0,90,0.0,2.531487047672272,Dataset-provided aggregate column; inspect values before modelling.
+clusters,q50,float64,144,0,140,0.0,9.877072259783745,Dataset-provided aggregate column; inspect values before modelling.
+clusters,q75,float64,144,0,144,0.8097699880599976,44.3655560426414,Dataset-provided aggregate column; inspect values before modelling.
+clusters,Type,str,144,0,2,,,Dataset-provided aggregate column; inspect values before modelling.
+driving_dist,CDF Percentile,float64,100,0,100,1.0,100.0,Distribution percentile/CDF support field.
+driving_dist,Private car,float64,100,0,98,6.0,499.4,Dataset-provided aggregate column; inspect values before modelling.
+driving_dist,Official car,float64,100,0,100,6.0,499.0,Dataset-provided aggregate column; inspect values before modelling.
+driving_dist,SPV,float64,100,0,100,6.1,499.0,Dataset-provided aggregate column; inspect values before modelling.
+driving_dist,Rental car,float64,100,0,100,6.0,499.8,Dataset-provided aggregate column; inspect values before modelling.
+driving_dist,Bus,float64,100,0,100,10.0,494.0,Dataset-provided aggregate column; inspect values before modelling.
+driving_dist,Taxi,float64,100,0,100,7.0,499.0,Dataset-provided aggregate column; inspect values before modelling.
+battery_energy,type_2,str,6,0,6,,,Dataset-provided aggregate column; inspect values before modelling.
+battery_energy,Lower Whisker,float64,6,0,4,20.2,30.82214,Dataset-provided aggregate column; inspect values before modelling.
+battery_energy,Q1 (25%),float64,6,0,6,35.0,104.0075,Dataset-provided aggregate column; inspect values before modelling.
+battery_energy,Median (50%),float64,6,0,6,43.6,165.88,Dataset-provided aggregate column; inspect values before modelling.
+battery_energy,Q3 (75%),float64,6,0,5,52.7,285.6,Dataset-provided aggregate column; inspect values before modelling.
+battery_energy,Upper Whisker,float64,6,0,6,75.5631,374.65,Dataset-provided aggregate column; inspect values before modelling.
+energy_ratio,type_2,str,6,0,6,,,Dataset-provided aggregate column; inspect values before modelling.
+energy_ratio,Lower Whisker,int64,6,0,1,0,0,Dataset-provided aggregate column; inspect values before modelling.
+energy_ratio,Q1 (25%),float64,6,0,6,0.07,0.49,Dataset-provided aggregate column; inspect values before modelling.
+energy_ratio,Median (50%),float64,6,0,5,0.14,0.8,Dataset-provided aggregate column; inspect values before modelling.
+energy_ratio,Q3 (75%),float64,6,0,6,0.24,1.33,Dataset-provided aggregate column; inspect values before modelling.
+energy_ratio,Upper Whisker,float64,6,0,6,0.495,2.5900000000000003,Dataset-provided aggregate column; inspect values before modelling.
+charging_freq,type_2,str,6,0,6,,,Dataset-provided aggregate column; inspect values before modelling.
+charging_freq,Lower Whisker,float64,6,0,1,0.3333333333333333,0.3333333333333333,Dataset-provided aggregate column; inspect values before modelling.
+charging_freq,Q1 (25%),float64,6,0,6,0.3666666666666666,1.0,Dataset-provided aggregate column; inspect values before modelling.
+charging_freq,Median (50%),float64,6,0,6,0.4666666666666667,1.7,Dataset-provided aggregate column; inspect values before modelling.
+charging_freq,Q3 (75%),float64,6,0,6,0.6333333333333333,2.966666666666667,Dataset-provided aggregate column; inspect values before modelling.
+charging_freq,Upper Whisker,float64,6,0,6,1.0333333333333332,5.916666666666667,Dataset-provided aggregate column; inspect values before modelling.
+charger_hist_car,time_slot,int64,60,0,60,0,59,Temporal index or time-of-day field from the aggregated public dataset.
+charger_hist_car,Interval,str,60,0,60,,,Dataset-provided aggregate column; inspect values before modelling.
+charger_hist_car,Height,float64,60,0,60,0.0007136873627207,0.3197649185064014,Dataset-provided aggregate column; inspect values before modelling.
+charger_hist_bus,time_slot,int64,300,0,300,0,299,Temporal index or time-of-day field from the aggregated public dataset.
+charger_hist_bus,Interval,str,300,0,300,,,Dataset-provided aggregate column; inspect values before modelling.
+charger_hist_bus,Height,float64,300,0,289,6.965061510199462e-06,0.0468835702905301,Dataset-provided aggregate column; inspect values before modelling.
+charger_hist_spv,time_slot,int64,125,0,125,0,124,Temporal index or time-of-day field from the aggregated public dataset.
+charger_hist_spv,Interval,str,125,0,125,,,Dataset-provided aggregate column; inspect values before modelling.
+charger_hist_spv,Height,float64,125,0,115,7.409767555591781e-06,0.0419096452944271,Dataset-provided aggregate column; inspect values before modelling.
