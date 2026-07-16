@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+models/saved/*
+!models/saved/.gitkeep
+figures/*
+!figures/.gitkeep
+results/metrics/*
+!results/metrics/.gitkeep
