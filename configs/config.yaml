@@ -1,0 +1,65 @@
+project:
+  name: "EV Grid-Stress Classification & Smart Charging Simulation"
+  author: "Anusha"
+  version: "1.0.0"
+  random_seed: 42
+paths:
+  raw_data: "data/raw"
+  processed_data: "data/processed"
+  synthetic_data: "data/synthetic"
+  models: "models/saved"
+  results: "results/metrics"
+  figures: "figures"
+  reports: "results/reports"
+data:
+  zenodo_record_id: 13852045
+  zenodo_url: "https://zenodo.org/api/records/13852045"
+  zenodo_zip: "data/raw/13852045.zip"
+  charging_load_file: "Fig3-2.Daily charging load from electric vehicles across different vehicle types and power level.csv"
+  vehicle_count_file: "Fig3-1.Number of vehicles being charged by level by time of day.csv"
+  usage_pattern_file: "Fig2a.Daily usage patterns of EVs across different vehicle types and days.csv"
+  soc_file: "Fig2b. SOC levels before and after charging by charging level by vehicle type.csv"
+  ecr_temp_file: "Fig2c-bottom.ECR of passenger cars as a function of temperature.csv"
+  ecr_month_file: "Fig2c-top.Energy consumption rate (ECR) of passenger cars by month of the year.csv"
+  clusters_file: "clusters_tempo.csv"
+  driving_dist_file: "Fig1e.Daily driving distance of different vehicle types.csv"
+  battery_energy_file: "Fig1b.Distribution of battery energy by vehicle types.csv"
+  energy_ratio_file: "Fig1f-1.The ratio of daily energy consumed over battery energy.csv"
+  charging_freq_file: "Fig1f-2.The number of charging events per day.csv"
+  charger_hist_car: "FigSI2-1.Empirical distributions of charger power delivered to cars.csv"
+  charger_hist_bus: "FigSI2-2.Empirical distributions of charger power delivered to buses.csv"
+  charger_hist_spv: "FigSI2-3.Empirical distributions of charger power delivered to SPVs.csv"
+  n_sessions_per_slot: 10
+target:
+  method: "composite"
+  load_percentile_threshold: 75
+  high_load_only_pct: 90
+  sensitivity_percentiles: [70, 75, 80, 85, 90]
+  positive_class_label: 1
+  negative_class_label: 0
+vehicle_types: ["Private car", "Taxi", "Official car", "Rental car", "Bus", "SPV"]
+power_levels:
+  cars: {P1: [0, 4], P2: [4, 20], P3: [20, 999]}
+  bus: {P1: [0, 70], P2: [70, 185], P3: [185, 999]}
+  spv: {P1: [0, 10], P2: [10, 65], P3: [65, 999]}
+features:
+  temporal: [hour_of_day, minute_of_day, hour_sin, hour_cos, is_peak_morning, is_peak_evening, is_daytime, is_night]
+  charging: [power_level_encoded, power_level_kw_min, power_level_kw_max, vehicle_count, charging_load_kw]
+  vehicle: [vehicle_type_encoded, is_service_vehicle, battery_median_kwh, energy_ratio_median, daily_charging_freq, daily_driving_dist_p50]
+  grid: [total_concurrent_load, p3_concurrent_load, load_share, cluster_id]
+  contextual: [is_workday, ecr_month_mean]
+models:
+  random_forest: {n_estimators: 300, max_depth: 15, min_samples_split: 5, min_samples_leaf: 2, max_features: "sqrt", class_weight: "balanced", n_jobs: -1, random_state: 42}
+  xgboost: {n_estimators: 300, max_depth: 7, learning_rate: 0.05, subsample: 0.8, colsample_bytree: 0.8, scale_pos_weight: auto, eval_metric: "auc", random_state: 42}
+  lightgbm: {n_estimators: 300, max_depth: 7, learning_rate: 0.05, num_leaves: 63, subsample: 0.8, colsample_bytree: 0.8, class_weight: "balanced", random_state: 42, verbose: -1}
+training: {test_size: 0.2, val_size: 0.1, cv_folds: 5, stratify: true, scoring: "roc_auc", use_smote: false}
+evaluation:
+  metrics: [accuracy, precision, recall, f1, roc_auc, average_precision, confusion_matrix]
+  threshold: 0.5
+shap: {max_display: 20, n_samples_background: 100, n_samples_explanation: 500}
+simulation:
+  strategies:
+    - {name: Baseline, description: "No intervention. Charging occurs as observed.", shift_minutes: 0}
+    - {name: Delay_P3_Peak, description: "Delay P3 sessions starting during peak hours by 2 hours.", target_power_levels: [P3], peak_hours: [7,8,9,17,18,19,20], shift_minutes: 120}
+    - {name: Redistribute_Top25Pct, description: "Redistribute model-predicted High Grid-Stress intervals to off-peak windows.", use_model_predictions: true, target_off_peak_hours: [1,2,3,4,22,23]}
+    - {name: V2G_Peak_Shaving, description: "Buses and taxis discharge during top-10% peak slots.", target_vehicle_types: [Bus, Taxi], peak_pct_threshold: 90, discharge_fraction: 0.15}
