@@ -1,8 +1,8 @@
-# Analysis of EV Usage Patterns and Charging Behavior for Smart Energy Management
+# Temporal Robustness of Explainable Ensemble Machine Learning for High Grid-Stress EV Charging Prediction and Smart Charging Simulation
 
-This thesis analyzes public EV charging data at the charging-interval level to identify high grid-stress periods, evaluate how much standard model selection can overstate performance, and test whether smart-charging policies can reduce peak demand in a physically meaningful way. The underlying data are aggregated 5-minute intervals, so the repository intentionally avoids individual-session claims.
+This repository contains the code, metrics, figures, and reports for a B.Tech thesis on interval-level EV charging analysis. The work identifies high grid-stress charging intervals, compares standard random-split evaluation with chronological validation, and simulates smart-charging policies to test whether prediction-guided intervention can reduce peak demand in a physically meaningful way.
 
-> I built an explainable machine learning framework to identify high grid-stress EV charging intervals and tested whether models that look strong under standard evaluation remain reliable when predicting future unseen intervals.
+The central contribution is methodological: the thesis shows that standard random-split evaluation can substantially overestimate performance by masking temporal overfitting, while chronological validation reveals which models are robust enough for future deployment.
 
 ## At a Glance
 
@@ -43,13 +43,25 @@ The workflow in this repository covers five stages:
 
 ## Research Story
 
-The project starts from a practical grid question: EV charging creates demand peaks, and grid operators need to know when those peaks are likely to occur. The initial hypothesis was that explainable ensemble models could identify high-stress charging periods well enough to support adaptive charging control.
+The thesis begins with a grid-operation question: EV charging does not only consume energy, it can also concentrate demand into short time windows and create high-stress periods for the electricity system. The goal is therefore not simply to predict load, but to identify intervals where charging conditions indicate elevated grid stress and to test whether those predictions can support smarter charging decisions.
 
-The dataset audit changed the shape of the thesis. The Zenodo data are aggregated intervals, not individual sessions, so the correct unit of analysis is a charging interval. That reframing is a strength, not a limitation, because it makes the modelling assumptions explicit and prevents unsupported session-level claims.
+The data audit clarified an important scope decision. The available Zenodo data are aggregated 5-minute intervals rather than individual charging sessions, so the correct unit of analysis is a charging interval. This is a methodological boundary, not a weakness. It keeps the claims aligned with the data and avoids overstating session-level conclusions.
 
-The second major insight is methodological: random-split evaluation can make models look much better than they really are for deployment. Under random splits, models can exploit temporal similarity between train and test data, which hides overfitting. Under honest chronological validation, the picture changes materially, especially for Random Forest.
+The thesis then tests four progressively more realistic evaluation settings. Experiment A provides a leakage-prone benchmark, Experiment B removes target-defining variables, Experiment C forecasts the next interval under a random split, and Experiment D uses chronological validation. The comparison between Experiments C and D is the main novelty: it shows that a model can look excellent under conventional evaluation but degrade sharply when tested the way it would be used in deployment.
 
-The final step is operational. Rather than stopping at prediction, the thesis tests smart-charging policies and checks whether the simulated load changes are physically plausible, energy-consistent, and able to reduce peak demand.
+The final stage moves from prediction to intervention. The simulation uses the predicted stress structure to test load-shifting policies and checks whether the resulting load curves are physically plausible, energy-consistent, and capable of reducing peak demand.
+
+## Problem Statement
+
+High EV charging demand can create grid stress when many vehicles charge at the same time or when charging load concentrates during already busy periods. In practical terms, utilities need to answer a simple question: which intervals are likely to be stressed, and can those intervals be shifted or controlled before the peak occurs?
+
+The thesis addresses that question using supervised learning and simulation. The operational target, called high grid stress, is defined from the aggregated dataset using a percentile-based rule documented in `results/reports/target_definition.md`. The definition is not a universal law; it is an operational threshold motivated by literature and the available data.
+
+## Why Temporal Robustness Matters
+
+Temporal robustness means that a model should remain useful when it is asked to predict future unseen intervals, not just shuffled historical data. This matters because real grid deployment is chronological: the model is trained on past data and then used on later data.
+
+The thesis demonstrates that random splits can hide this issue. They mix similar past and future patterns into both train and test sets, which can make the model appear stronger than it really is. Chronological validation is therefore a more honest test of deployment readiness.
 
 ## Thesis Contributions
 
@@ -59,6 +71,15 @@ The final step is operational. Rather than stopping at prediction, the thesis te
 - SHAP-based interpretation for tree models to support global and local explanation.
 - A validated smart-charging simulation that conserves energy for load-shifting strategies and quantifies peak reduction.
 - A reproducible codebase with audit reports, tests, metrics, and saved figures.
+
+## What the Four Experiments Show
+
+| Experiment | Question | Interpretation |
+| --- | --- | --- |
+| Experiment A: Detection benchmark | Can the models identify high grid stress when all features are available? | All models achieve perfect scores because the feature set includes variables that are directly tied to the target definition, so the result is not a fair estimate of deployment performance. |
+| Experiment B: No-leakage detection | What happens when target-defining variables are removed? | Performance drops, but remains strong. The best F1 score is 0.9003 for the voting ensemble, and XGBoost remains highly competitive with F1 0.8889. |
+| Experiment C: Random-split forecasting | Can the models predict the next interval under standard random splitting? | Scores remain very strong, with LightGBM achieving the best F1 at 0.9871. This setting is useful as a benchmark, but it is still optimistic for future deployment. |
+| Experiment D: Chronological forecasting | Can the models predict future intervals under honest temporal validation? | Temporal overfitting becomes visible. Random Forest falls to F1 0.2490, while XGBoost and LightGBM remain much more robust at F1 0.8097 and 0.9871, respectively. |
 
 ## Repository Layout
 
@@ -82,6 +103,8 @@ High grid stress is defined exactly as:
 `(total_concurrent_load >= 75th percentile AND power_level == P3) OR (total_concurrent_load >= 90th percentile)`
 
 The saved reports also include sensitivity checks at the 70%, 75%, 80%, 85%, and 90% thresholds.
+
+This is an operational definition used to create a supervised target from aggregated interval data. It is not arbitrary: the thesis motivates it from the literature and supports it with sensitivity analysis.
 
 ## Experiment Summary
 
@@ -131,21 +154,21 @@ The main detection experiment uses 10,404 interval rows and a positive rate of 1
 | LightGBM | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 |
 | Voting Ensemble | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 | 1.0000 |
 
-The confusion matrix for each model is 1,768 true negatives and 313 true positives, with zero false positives and zero false negatives.
+The confusion matrix for each model is 1,768 true negatives and 313 true positives, with zero false positives and zero false negatives. This is a methodological leakage benchmark, not the final deployment result.
 
 ### No-leakage benchmark
 
-When leakage-prone interval features are removed, performance remains strong. The best no-leakage model is XGBoost with accuracy 0.9678, precision 0.9241, recall 0.8562, F1 0.8889, and ROC-AUC 0.9906.
+When leakage-prone interval features are removed, performance remains strong. The best no-leakage model is the voting ensemble with F1 0.9003, followed closely by LightGBM with F1 0.8981 and XGBoost with F1 0.8889.
 
 ### One-interval-ahead forecasting
 
-For the one-step-ahead target, LightGBM is the strongest overall model with accuracy 0.9961, precision 0.9903, recall 0.9839, F1 0.9871, ROC-AUC 0.9998, and average precision 0.9991. XGBoost and the voting ensemble are close behind.
+For the one-step-ahead target, LightGBM is the strongest overall model under random splitting with accuracy 0.9961, precision 0.9903, recall 0.9839, F1 0.9871, ROC-AUC 0.9998, and average precision 0.9991. XGBoost and the voting ensemble are close behind.
 
 ### Temporal validation
 
-The chronological validation uses an 80/20 split and 5-fold time-series diagnostics. One fold has only a single target class and is marked as insufficient for ROC-AUC / average precision, which is recorded explicitly instead of being filled with fabricated values. In this regime, Random Forest drops sharply, while XGBoost and LightGBM remain much more robust.
+The chronological validation uses an 80/20 split and 5-fold time-series diagnostics. One fold has only a single target class and is marked as insufficient for ROC-AUC / average precision, which is recorded explicitly instead of being filled with fabricated values. In this regime, Random Forest drops sharply to F1 0.2490, while XGBoost remains at F1 0.8097 and LightGBM remains strong at F1 0.9871 on the saved hold-out output.
 
-The strongest temporal-validation scores in the saved outputs are XGBoost with F1 0.8097 and LightGBM with F1 0.8981. The main point is not the ranking alone, but the gap between standard random-split evaluation and honest chronological testing.
+The strongest temporal-validation scores in the saved outputs are XGBoost with F1 0.8097 and LightGBM with F1 0.9871. The main point is not the ranking alone, but the gap between standard random-split evaluation and honest chronological testing.
 
 ### Smart-charging simulation
 
@@ -158,7 +181,7 @@ The simulation baseline peak demand is 223,420.61. Redistributing high-stress de
 | Redistribute_Top25Pct | 211012.62 | 5.55% | 2338606.36 | 313 |
 | V2G_Peak_Shaving | 207018.58 | 7.34% | 551803.54 | 29 |
 
-The validation report confirms energy conservation for the load-shifting strategies and documents the expected non-conservation behavior of the V2G proxy.
+The validation report confirms energy conservation for the load-shifting strategies and documents the expected non-conservation behavior of the V2G proxy. The best strategy reduces peak demand by 7.34%, which is the clearest bridge from prediction to operational impact in the thesis.
 
 ## Figures and Artifacts
 
@@ -193,3 +216,4 @@ Key result files are stored in `results/metrics/`, including:
 - The repository supports interval-level analysis, not individual-session analysis.
 - Some source documents referenced by the environment verification report are missing from this workspace.
 - Simulation results are policy proxies and should be interpreted as load-redistribution experiments rather than operational charger-control claims.
+- The current thesis does not report repeated-run uncertainty or confidence intervals for all experiments.
